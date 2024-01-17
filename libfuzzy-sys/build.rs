@@ -47,11 +47,28 @@ fn main() {
     // shared object; recompile with -fPIC"
     cflags.push("-fPIC");
 
-    run(Command::new(&src.join("libfuzzy/configure"))
+    let mut cxxflags = OsString::new();
+    for arg in compiler.args() {
+        cxxflags.push(arg);
+        cxxflags.push(" ");
+    }
+
+    let mut configure_command = Command::new(&src.join("libfuzzy/configure"));
+    configure_command
         .arg("--enable-shared=no")
-        .arg("--enable-static=yes")
+        .arg("--enable-static=yes");
+    if cfg!(target_pointer_width = "32") {
+        configure_command
+            .arg("--build=x86_64-pc-linux-gnu")
+            .arg("--target=i686-pc-linux-gnu");
+    }
+    configure_command
         .env("CFLAGS", cflags)
-        .current_dir(&dst));
+        .env("CXXFLAGS", cxxflags)
+        .current_dir(&dst);
+
+    run(&mut configure_command);
+
 
     run(Command::new("make")
         .arg(&format!("-j{}", env::var("NUM_JOBS").unwrap()))
