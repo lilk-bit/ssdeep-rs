@@ -60,7 +60,7 @@ fn main() {
     if cfg!(target_pointer_width = "32") {
         configure_command
             .arg("--build=x86_64-pc-linux-gnu")
-            .arg("--target=i686-pc-linux-gnu");
+            .arg("--target=i586-pc-linux-gnu");
     }
     configure_command
         .env("CFLAGS", cflags)
